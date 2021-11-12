@@ -1,4 +1,6 @@
 # Defines the basic dynamics of the virus
+# Depends on WrightSampler.jl
+# Gets used by virus_trace.jl
 
 export initialize_viral_population, restart_viral_population!
 
@@ -39,12 +41,12 @@ function bitmask_toggle_choose(b::Int64, vec0::Vector{Float64}, vec1::Vector{Flo
     limit = rand() * tot
     @inbounds for i in 1:length(vec0)
         if readbit(b, i) == 0
-            limit -= vec0[i]
+            limit -= vec1[i] # first (0,1), testing (1,0)
         else
-            limit -= vec1[i]
+            limit -= vec0[i]
         end
         if limit < 0 
-            return i
+            return i # terminate early
         end
     end
     return 0
@@ -53,7 +55,7 @@ end
 
 function mutation_operator_closure(ab_profile_list, ν)
     let mut0 = mapreduce(y -> map(x->x[1],y), vcat, ab_profile_list),
-        mut1 = mapreduce(y -> map(x->x[2],y), vcat, ab_profile_list), # mapreduce would be cleaner
+        mut1 = mapreduce(y -> map(x->x[2],y), vcat, ab_profile_list), 
 		tot = sum(mut0) + sum(mut1)
 		# this is a let-block to capture a fixed
 		function mutate!(vp::ViralPopulation) # attempt to mutate a virus at index ind
@@ -133,20 +135,22 @@ function equilibrium_sampler(θ, ab_profile_list)
 end
 
 function initialize_viral_population(θ::Float64, ab_profile_list;
-		mut_per_gen = 3*10^(-6), # the mutation rate measured in growth rate 10^-6
-		decayrate = 0.4,
-		f = 1.0/3)
+		mut_per_gen = 3*1.1*10^(-5), # the base (avg'd) transition rate measured in growth rate
+		decayrate = 0.31,
+        λ = 2.0,
+		f = 1.0/3,
+        mutations = true,
+        antibody = true) # toggles the mutations on and off
 	μ = mut_per_gen * f # absolute transition mutation rate in equilirbrium
-	λ = 2 * decayrate  #  λ = μ*2*capacity/θ   =>    λ * θ/ (2 μ) = capacity
 	capacity = ceil(Int64, λ * θ / (2 * μ))
-    ν = θ / capacity / 2# per-birth-event mutation rate; ν = μ/λ = θ / 2 capacity
+    ν = θ / capacity / 2 # per-birth-event mutation rate; ν = μ/λ = θ / 2 capacity
 	if λ<f 
 		error("pop_size too small to support growth rate") 
 	end
     sampler_vec = equilibrium_sampler(θ, ab_profile_list)
 	fitness_function = fitness_function_closure(ab_profile_list, f, μ)
-	mutation_operator = mutation_operator_closure(ab_profile_list, ν)
-	escape_function = escape_function_closure(ab_profile_list)
+	mutation_operator = mutations ? mutation_operator_closure(ab_profile_list, ν) : x -> nothing
+	escape_function = antibody ? escape_function_closure(ab_profile_list) : x -> true
 	pop = Virus[]
 	fitness_total = 0.0
 	vp = ViralPopulation(0.0, 
@@ -195,7 +199,7 @@ function gillespie_step!(vp::ViralPopulation)
                 vp.fitness_total += virus.fitness
             else
                 vp.fitness_total -= virus.fitness
-            end # else get rid of that shit, it is dead
+            end # else get rid of that virus, it is dead
         else # if the virus is neutralized
             if rand() >  vp.r /vp.λ # check and see if you are actually getting rid of it at the proper rate
                 push!(vp.pop,virus) # put that virus back if you tried to kill it too quickly

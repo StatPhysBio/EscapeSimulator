@@ -1,5 +1,7 @@
 using Colors, HDF5, Distributions
 
+
+## This file is an attempt to use Julia's oddly awesome color generation support ot making the best plots
 path = "/Users/lamont/Dropbox/Colin_ControlTheory/HIV trapping code/Julia results/"
 ##
 fid = h5open("$(path)colorlist.h5", "cw")

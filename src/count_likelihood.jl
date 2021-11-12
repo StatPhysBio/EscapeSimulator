@@ -166,11 +166,11 @@ function like_rs_pop(rs, ls; avg = 0)
 end
 
 function baysian_pop_rs(ls; samples = 10^4, burn_in = 10^3, avg = 0) # ls is an array of likelihood sampers
-    ll = rs -> like_rs_pop(rs, ls; avg = avg)
-    baysian_sample_rs(ll; samples = samples, burn_in = burn_in)
+    ll = rs -> like_rs_pop(rs, ls; avg)
+    baysian_sample_rs(ll; samples, burn_in)
 end
 
-function baysian_sample_rs(ll; samples = 10^4, burn_in = 50)
+function baysian_sample_rs(ll; samples = 10^4, burn_in = 100)
     # takes a log-likelihood and returns the sampled distribuiton with
     run  = Float64[]
     rs = 100
@@ -180,6 +180,26 @@ function baysian_sample_rs(ll; samples = 10^4, burn_in = 50)
     end
     return run[burn_in+1:end]
 end
+
+# attempt to 
+# function baysian_sample_newton(ll, grad_hess; samples = 10^4, burn_in = 50)
+#     # takes a log-likelihood and
+#     # gradient and hessian returns 
+#     # the sampled distribuiton
+#     run  = Float64[]
+#     rs = 100 # current value
+#     for ii in 1:(samples + burn_in)
+#         rs = newton_sample(rs, ll, grad_hess)
+#         push!(run,rs)
+#     end
+#     return run[burn_in+1:end]
+# end
+
+# function newton_sample(rs, ll, grad_hess; (g,h) = grad_hess(rs))
+#     (g,h) = grad_hess(rs);
+#     rs - g/h + h^(-1/2)*randn() # move toward zero
+#       
+# end
 
 function mh_step(ll, θ; σ = 50) # 1-d mh_stepper
     oldll = ll(θ)

@@ -80,8 +80,10 @@ function incrementx!(ws::WrightSampler)
 end
 
 function sample!(ws::WrightSampler)
+    for ii in 1:5
     incrementk!(ws)
     incrementx!(ws)
+    end
     return ws.x
 end
 

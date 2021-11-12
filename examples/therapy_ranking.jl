@@ -9,37 +9,20 @@ using Random
 
 include("file_access.jl")
 
+# trialsimulations_statistics.h5 is
 
 h5open("/Users/lamont/Dropbox/Colin_ControlTheory/HIV trapping code/trialsimulations_statistics.h5", "r") do fid
     global reservoir_factor = read(fid["best_fit_multplier"])
 end
-ab_profile_list_bayes(ab_list) = map(ab -> get_antibody_profile_bayes(ab), ab_list)
 ##
 
-function random_swap!(array::Vector) # bring an element of a vector to the end
-    # My thinking is that this will be good for memory management
-    ii = rand(1:length(array))
-    @inbounds (array[end],array[ii]) = (array[ii],array[end]);
-end
 
-
-
-
-## set of helper functions and path definitions for reading in data
-using ProfileVega
-using Profile
-Profile.clear()
-
-@time trial_rebound_prob(get_start_theta("all") .* reservoir_factor, ab_profile_list_bayes(["10-1074"]);
-    n_samples = 1000)
-
-ProfileVega.view()
 ## Combinations
 
 using Combinatorics
 
 function rebound_dict(ab_list, n_antibodies; quartile_estimator_samples = 40) 
-    out = Dict{Array{String,1},Array{Float64,1}}()
+    out = Dict{Array{String,1},Array{Float64,1}}() 
     for combo in combinations( ab_list, n_antibodies)
         list = Float64[]
         for _ in 1:quartile_estimator_samples
