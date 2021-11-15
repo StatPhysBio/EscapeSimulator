@@ -35,10 +35,13 @@ vp = initialize_viral_population(θ, ab_profile_list;
 ```
 We then can evolve a population forward in time or get a rebound time using several functions with increasing sophistication
 
-	- `virus_time_trace` generates a time trace from 0-56 days recording mutant and wildtype fractions
-	- `rebound_time` generates a truncated trace up until `breakpoint = 0.8`, a threshold for the mutant fraction to acieve afterwhich the dynamics are deterministic. It returns `(reboundtime,trace)`
-	- `viral_rebound_times` efficiently samples multiple rebound times with the same parameters by restarting the viral popuplation after every breakpoint
-	- `trial_rebound_times` multi-threaded version which simulates the rebound times of a trial with a constant antibody profile, but which includes diversity variation.
+`virus_time_trace` generates a time trace from 0-56 days recording mutant and wildtype fractions
+
+`rebound_time` generates a truncated trace up until `breakpoint = 0.8`, a threshold for the mutant fraction to acieve afterwhich the dynamics are deterministic. It returns `(reboundtime,trace)`
+
+`viral_rebound_times` efficiently samples multiple rebound times with the same parameters by restarting the viral popuplation after every breakpoint
+
+`trial_rebound_times` multi-threaded version which simulates the rebound times of a trial with a constant antibody profile, but which includes diversity variation.
 
 
 ## Calculating Discrepancies
