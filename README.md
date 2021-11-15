@@ -1,9 +1,9 @@
 # EscapeSimulator
 
-EscapeSimulator is a pop-gen simulator for Julia. This is a derivative of the Tomoko.jl package but with significant differences:
+EscapeSimulator is a pop-gen simulator for Julia. This is a derivative of the Tomoko.jl package but with differences:
 	1. Genotypes are represented as unsigned integers (`UInt64`) instead of `BitVectors` which have unlimited length. This means that genotypes have a maximum length of 64, thus the maximal number of escape sites in the simulation is 64. The benefit is that UInt64 is a static memory object which leads to significant speed-ups.
 	2. The mutation model is much more flexible in that mutations can occur at different forward and backward rates µ ≠ µ_dagger, and they can differ based on the site of interest.
-	3. Other functions related to the data analysis of the paper are also included
+	3. Other functions related to the data analysis and discrepancy are also included
 
 # Basic Operations
 
@@ -13,7 +13,8 @@ See the file: bayes_posterior.jl in HIVTreatmentOptimization/JuliaScripts for ex
 Afterward we can combine likelihood estimates using different averaging procedures 
 
 ```julia
-posterior_sample = baysian_pop_rs(list_of_lists_of_LikelihoodSample; samples = 2*10^3, burn_in = 10^2, avg = avg)
+posterior_sample = baysian_pop_rs(listof_listof_LikelihoodSamples; 
+	samples = 2*10^3, burn_in = 10^2, avg = avg)
 ```
 
 `avg` is a keyword between 0 and 1 that toggles between independent `avg = 0` and patient averaged `avg = 1.0` samples.
@@ -34,10 +35,10 @@ vp = initialize_viral_population(θ, ab_profile_list;
 ```
 We then can evolve a population forward in time or get a rebound time using several functions with increasing sophistication
 
-	* `virus_time_trace` generates a time trace from 0-56 days recording mutant and wildtype fractions
-	* `rebound_time` generates a truncated trace up until `breakpoint = 0.8`, a threshold for the mutant fraction to acieve afterwhich the dynamics are deterministic. It returns `(reboundtime,trace)`
-	* `viral_rebound_times` efficiently samples multiple rebound times with the same parameters by restarting the viral popuplation after every breakpoint
-	* `trial_rebound_times` multi-threaded version which simulates the rebound times of a trial with a constant antibody profile, but which includes diversity variation.
+	- `virus_time_trace` generates a time trace from 0-56 days recording mutant and wildtype fractions
+	- `rebound_time` generates a truncated trace up until `breakpoint = 0.8`, a threshold for the mutant fraction to acieve afterwhich the dynamics are deterministic. It returns `(reboundtime,trace)`
+	- `viral_rebound_times` efficiently samples multiple rebound times with the same parameters by restarting the viral popuplation after every breakpoint
+	- `trial_rebound_times` multi-threaded version which simulates the rebound times of a trial with a constant antibody profile, but which includes diversity variation.
 
 
 ## Calculating Discrepancies
