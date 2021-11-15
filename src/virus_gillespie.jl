@@ -134,13 +134,16 @@ function equilibrium_sampler(θ, ab_profile_list)
     mapreduce( y -> map(x-> WrightSampler((x .* θ)...), y), vcat, ab_profile_list)
 end
 
-function initialize_viral_population(θ::Float64, ab_profile_list;
-		mut_per_gen = 3*1.1*10^(-5), # the base (avg'd) transition rate measured in growth rate
-		decayrate = 0.31,
-        λ = 2.0,
-		f = 1.0/3,
-        mutations = true,
-        antibody = true) # toggles the mutations on and off
+function initialize_viral_population(θ, ab_profile_list;
+    # θ is the diversity of the viral population at treatment initiation, and sets the effective carrying capacity via θ = 2 N_e μ
+    # ab_profile_list consists of a list of ab_profiles. Each profile is a list of site profiles, which itself is a list cosisting of 
+    # [forward mutation rate, backward mutation rate, fitness cost]
+        mut_per_gen = 3*1.1*10^(-5), # the base (avg'd) transition rate measured in growth rate
+        decayrate = 0.31, # the rate of removal 
+        λ = 2.0, # total noise rate of the populaiton
+        f = 1.0/3, # absolute growth rate
+        mutations = true, # whether or not to include post-treatment mutations
+        antibody = true)
 	μ = mut_per_gen * f # absolute transition mutation rate in equilirbrium
 	capacity = ceil(Int64, λ * θ / (2 * μ))
     ν = θ / capacity / 2 # per-birth-event mutation rate; ν = μ/λ = θ / 2 capacity
