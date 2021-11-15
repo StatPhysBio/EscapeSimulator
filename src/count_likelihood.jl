@@ -1,4 +1,4 @@
-export estimate_rs
+export LikelihoodSample, baysian_pop_rs
 
 """
 This is a MLE for fitting the selection parameters to a time trace, given the neutral parameters
